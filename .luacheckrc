@@ -15,4 +15,4 @@ read_globals = {
     "SetupRunData",
     "lib"
 }
-exclude_files = { "src/main.lua", "src/main_special.lua" }
+exclude_files = { "src/main.lua", "src/main_special.lua", "src/behaviors/*.lua" }

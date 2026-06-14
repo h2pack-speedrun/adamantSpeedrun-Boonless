@@ -6,11 +6,11 @@ Part of the [Speedrun modpack](https://github.com/h2pack-speedrun/speedrun-modpa
 
 ## What It Does
 
-This module is the home for boonless route settings, including the Vow of Forsaking and special boon-provider behavior that was previously tested as raw game-script edits.
+This module provides boonless route settings, including unlimited Vow of Forsaking boon skips and optional Shared Wealth fallbacks for boon offers, special offers, weapon upgrades, and route NPC rewards.
 
 ## Gameplay Impact
 
-No gameplay changes are active yet. The module has been scaffolded so the boonless behavior can be ported cleanly through ModpackLib hooks instead of replacing game files.
+All options are disabled by default. Use the preset dropdown for common route shapes, or enable only the individual pieces needed for the category you are running.
 
 ## How To Use
 

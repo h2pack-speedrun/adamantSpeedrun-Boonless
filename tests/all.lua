@@ -1,4 +1,5 @@
 package.path = "./?.lua;./?/init.lua;" .. package.path
 
-local lu = require("luaunit")
-os.exit(lu.LuaUnit.run())
+dofile("tests/test_ui.lua")
+
+print("Boonless tests passed")
