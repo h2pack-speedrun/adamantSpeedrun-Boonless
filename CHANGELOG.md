@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-06-14
+
+### Added
+
+- update boonless challenge presets (3a4f432)
+- add boonless route controls (
+163c87)
+
 ### Added
 
 - Scaffolded the Boonless module for the Speedrun modpack.
