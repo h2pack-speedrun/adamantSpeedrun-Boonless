@@ -1,21 +1,28 @@
 # Boonless
 
-Boonless route options for the Speedrun modpack.
+Boonless module for the Speedrun modpack.
 
-Part of the [Speedrun modpack](https://github.com/h2pack-speedrun/speedrun-modpack).
+Part of the [Speedrun modpack](https://thunderstore.io/c/hades-ii/p/adamantSpeedrun/Speedrun_Modpack/).
 
 ## What It Does
 
-This module provides boonless route settings, including unlimited Vow of Forsaking boon skips and optional Shared Wealth fallbacks for boon offers, special offers, weapon upgrades, and route NPC rewards.
+This module provides the option to transform all run rewards into onions of spare gold. It meant for challenge runs under a maybe Boonless category.
 
-## Gameplay Impact
+You have checkboxes for each individual reward or you can use provided presets.
 
-All options are disabled by default. Use the preset dropdown for common route shapes, or enable only the individual pieces needed for the category you are running.
 
-## How To Use
+Individual checkboxes available for Boons/Each NPC/Chaos/Hammer
+<img src="https://raw.githubusercontent.com/h2pack-speedrun/adamantSpeedrun-Boonless/main/assets/options.png" width="60%"/>
 
-Install using r2modman. In game, open the Speedrun menu and configure this module from the shared settings window.
+Presets available for 
+- Removing boons only
+- all Olympians gifts (9 core gods + Athena/Artemis/Dionysus/Hades)
+- all NPCs gifts (Olympians + Medea/Circe/Icarus/Arachne/Narcissus/Echo/Chaos).
+- The last presets also transforms hammers into gold.
+<img src="https://raw.githubusercontent.com/h2pack-speedrun/adamantSpeedrun-Boonless/main/assets/presets.png" width="60%"/>
 
-## More Information
+## Installation
 
-- [Speedrun modpack](https://github.com/h2pack-speedrun/speedrun-modpack)
+Install via r2modman.
+
+This module is usually installed as part of the full [Speedrun modpack](https://thunderstore.io/c/hades-ii/p/adamantSpeedrun/Speedrun_Modpack/), where it appears in the shared Speedrun UI with the other speedrun-focused modules.

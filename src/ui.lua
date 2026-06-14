@@ -15,13 +15,14 @@ local OLYMPIAN_GIFT_ALIASES = {
 }
 
 local NPC_GIFT_ALIASES = {
-    "HadesToSharedWealth",
     "ArachneToSharedWealth",
-    "CirceToSharedWealth",
-    "EchoToSharedWealth",
-    "IcarusToSharedWealth",
-    "MedeaToSharedWealth",
     "NarcissusToSharedWealth",
+    "EchoToSharedWealth",
+    "HadesToSharedWealth",
+    "MedeaToSharedWealth",
+    "CirceToSharedWealth",
+    "IcarusToSharedWealth",
+    "ChaosToSharedWealth",
 }
 
 local PRESETS = {
