@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-06-14
+
+### Fixed
+
+- remove license conflict markers (1e9b5b4)
+- readme preview minor fix (
+30e1a5)
+
 ## [1.0.0] - 2026-06-14
 
 ### Added
