@@ -1,16 +1,48 @@
 local BOON_OFFERS_ALIAS = "BoonOffersToSharedWealth"
+local SELENE_ALIAS = "SeleneToSharedWealth"
+local SPELL_DROP_NAME = "SpellDrop"
+local BOON_VOW_ALIAS = "BoonVowSkips"
+local HAMMER_VOW_ALIAS = "HammerVowSkips"
+local HEX_VOW_ALIAS = "HexVowSkips"
 
 local providers = {
     {
         alias = BOON_OFFERS_ALIAS,
         label = "Boon Offers to Shared Wealth",
         tooltip = "Makes normal god and Hermes boon offers fall back to Shared Wealth.",
+        extraOptions = {
+            {
+                alias = BOON_VOW_ALIAS,
+                label = "Onion Boons",
+                tooltip = "Keeps Vow of Forfeit active for normal god and Hermes boon room rewards.",
+            },
+        },
     },
     {
         alias = "WeaponUpgradesToSharedWealth",
-        label = "Weapon Upgrades to Shared Wealth",
+        label = "Hammers to Shared Wealth",
         lootName = "WeaponUpgrade",
         tooltip = "Makes Daedalus Hammer offers fall back to Shared Wealth.",
+        extraOptions = {
+            {
+                alias = HAMMER_VOW_ALIAS,
+                label = "Onion Hammers",
+                tooltip = "Lets Vow of Forfeit skip Daedalus Hammer room rewards.",
+            },
+        },
+    },
+    {
+        alias = SELENE_ALIAS,
+        label = "Selene to Shared Wealth",
+        lootName = SPELL_DROP_NAME,
+        tooltip = "Makes Selene Hex offers fall back to Shared Wealth instead of opening Path of Stars.",
+        extraOptions = {
+            {
+                alias = HEX_VOW_ALIAS,
+                label = "Onion Hexes",
+                tooltip = "Lets Vow of Forfeit skip Selene Hex room rewards.",
+            },
+        },
     },
     {
         alias = "ChaosToSharedWealth",
@@ -83,17 +115,52 @@ local providers = {
 local aliasByLootName = {}
 local options = {}
 
+local directChoiceFallbacks = {
+    {
+        functionName = "ArachneCostumeChoice",
+        alias = "ArachneToSharedWealth",
+    },
+    {
+        functionName = "NarcissusBenefitChoice",
+        alias = "NarcissusToSharedWealth",
+    },
+    {
+        functionName = "EchoChoice",
+        alias = "EchoToSharedWealth",
+    },
+    {
+        functionName = "MedeaCurseChoice",
+        alias = "MedeaToSharedWealth",
+    },
+    {
+        functionName = "CirceBlessingChoice",
+        alias = "CirceToSharedWealth",
+    },
+    {
+        functionName = "IcarusBenefitChoice",
+        alias = "IcarusToSharedWealth",
+    },
+}
+local directChoiceFallbackDepth = 0
+
+local function appendOption(option)
+    table.insert(options, {
+        type = "checkbox",
+        alias = option.alias,
+        label = option.label,
+        default = option.default == true,
+        tooltip = option.tooltip,
+    })
+end
+
 for _, provider in ipairs(providers) do
     if provider.lootName then
         aliasByLootName[provider.lootName] = provider.alias
     end
-    table.insert(options, {
-        type = "checkbox",
-        alias = provider.alias,
-        label = provider.label,
-        default = false,
-        tooltip = provider.tooltip,
-    })
+    appendOption(provider)
+    for _, extraOption in ipairs(provider.extraOptions or {}) do
+        appendOption(extraOption)
+    end
 end
 
 local function isBoonOffer(lootData)
@@ -112,6 +179,69 @@ local function shouldUseFallback(runtime, lootData)
     return alias ~= nil and runtime.data.read(alias)
 end
 
+local function shouldUseSeleneFallback(host, runtime, spellItem)
+    return host.isEnabled()
+        and spellItem ~= nil
+        and spellItem.Name == SPELL_DROP_NAME
+        and runtime.data.read(SELENE_ALIAS)
+end
+
+local function chargeSpellDropIfNeeded(spellItem, args)
+    if spellItem.ResourceCosts ~= nil and not HasResources(spellItem.ResourceCosts) then
+        CantAffordPresentation(spellItem)
+        return false
+    end
+    if args.PackageName then
+        LoadPackages({ Name = args.PackageName })
+    end
+    if HasResourceCost(spellItem.ResourceCosts) then
+        spellItem.Purchased = true
+        SpendResources(spellItem.ResourceCosts, spellItem.Name or "Loot")
+        RemoveStoreItem({ Id = spellItem.ObjectId, Name = spellItem.Name, ScreenName = UIData.SpellMenuId })
+        if (spellItem.ResourceCosts.Money or 0) > 0 then
+            HandleCharonPurchase("UseLoot", spellItem.ResourceCosts.Money)
+        end
+        PlaySound({ Name = "/Leftovers/Menu Sounds/StoreBuyingItem" })
+        thread(PlayVoiceLines, GlobalVoiceLines.PurchasedConsumableVoiceLines, true)
+    end
+    return true
+end
+
+local function prepareSeleneFallback(spellItem)
+    spellItem.UpgradeOptions = {}
+    spellItem.BlockReroll = true
+    spellItem.DestroyOnPickup = true
+    spellItem.PostPickupFunctionName = spellItem.PostPickupFunctionName or "SpellDropInteractPresentationEnd"
+    spellItem.MenuTitle = spellItem.MenuTitle or spellItem.BoonInfoTitleText or spellItem.SurfaceShopText or spellItem.Name
+    if spellItem.BackgroundAnimation == nil and spellItem.NarrativeContextArt ~= nil then
+        spellItem.BackgroundAnimation = spellItem.NarrativeContextArt .. "_In"
+    end
+end
+
+local function createSafeDirectChoiceOptions()
+    return {
+        { Type = "Trait", ItemName = "FallbackGold" },
+        { Type = "Trait", ItemName = "FallbackGold" },
+        { Type = "Trait", ItemName = "FallbackGold" },
+    }
+end
+
+local function copyArgsWithSafeDirectChoiceOptions(args)
+    local result = {}
+    for key, value in pairs(args or {}) do
+        result[key] = value
+    end
+    result.UpgradeOptions = createSafeDirectChoiceOptions()
+    return result
+end
+
+local function runWithDirectChoiceFallback(baseFunc, source, args, screen)
+    directChoiceFallbackDepth = directChoiceFallbackDepth + 1
+    local result = baseFunc(source, copyArgsWithSafeDirectChoiceOptions(args), screen)
+    directChoiceFallbackDepth = directChoiceFallbackDepth - 1
+    return result
+end
+
 return {
     options = options,
     hooks = {
@@ -126,6 +256,36 @@ return {
 
                 return result
             end)
+
+            module.hooks.wrap("OpenSpellScreen", function(host, runtime, baseFunc, spellItem, args, user)
+                args = args or {}
+                if not shouldUseSeleneFallback(host, runtime, spellItem) then
+                    return baseFunc(spellItem, args, user)
+                end
+                if not chargeSpellDropIfNeeded(spellItem, args) then
+                    return nil
+                end
+
+                prepareSeleneFallback(spellItem)
+                return HandleLootPickup(CurrentRun, spellItem, args)
+            end)
+
+            module.hooks.wrap("OpenUpgradeChoiceMenu", function(host, runtime, baseFunc, source, args)
+                if directChoiceFallbackDepth > 0 then
+                    source.UpgradeOptions = {}
+                    source.BlockReroll = true
+                end
+                return baseFunc(source, args)
+            end)
+
+            for _, fallback in ipairs(directChoiceFallbacks) do
+                module.hooks.wrap(fallback.functionName, function(host, runtime, baseFunc, source, args, screen)
+                    if host.isEnabled() and runtime.data.read(fallback.alias) then
+                        return runWithDirectChoiceFallback(baseFunc, source, args, screen)
+                    end
+                    return baseFunc(source, args, screen)
+                end)
+            end
         end,
     },
 }

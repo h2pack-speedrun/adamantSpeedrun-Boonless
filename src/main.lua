@@ -43,7 +43,7 @@ local function init()
         rom.gui.add_imgui(fallbackUi.renderWindow)
         rom.gui.add_to_menu_bar(fallbackUi.addMenuBar)
     end)
-    logic.attach(module, behaviors.patches, behaviors.hooks)
+    logic.attach(module, behaviors.hooks)
 
     local ok = module.activate()
     if not ok then

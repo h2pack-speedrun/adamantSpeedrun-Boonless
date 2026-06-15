@@ -11,14 +11,14 @@ This module provides the option to transform all run rewards into onions of spar
 You have checkboxes for each individual reward or you can use provided presets.
 
 
-Individual checkboxes available for Boons/Each NPC/Chaos/Hammer
+Individual checkboxes are available for boons, hammers, Selene, each route NPC, and Chaos. Boon, hammer, and Selene controls each pair a Shared Wealth fallback with a matching Vow of Forfeit skip toggle.
 
 <img src="https://raw.githubusercontent.com/h2pack-speedrun/adamantSpeedrun-Boonless/main/assets/options.png" width="60%"/>
 
 Presets available for:
 - Removing boons only
-- all Olympians gifts (9 core gods + Athena/Artemis/Dionysus/Hades)
-- all NPCs gifts (Olympians + Medea/Circe/Icarus/Arachne/Narcissus/Echo/Chaos).
+- all Olympians gifts (9 core gods + Athena/Artemis/Dionysus)
+- all NPC and special gifts (Olympians + Medea/Circe/Icarus/Arachne/Narcissus/Echo/Hades/Chaos/Selene).
 - The last presets also transforms hammers into gold.
 
 <img src="https://raw.githubusercontent.com/h2pack-speedrun/adamantSpeedrun-Boonless/main/assets/presets.png" width="60%"/>

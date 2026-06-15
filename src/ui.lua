@@ -1,12 +1,31 @@
 local module = {}
 
 local PRESET_ALIAS = "Preset"
-local UNLIMITED_BOON_SKIPS_ALIAS = "UnlimitedBoonSkips"
 local BOON_OFFERS_ALIAS = "BoonOffersToSharedWealth"
+local BOON_VOW_ALIAS = "BoonVowSkips"
+local HAMMER_OFFERS_ALIAS = "WeaponUpgradesToSharedWealth"
+local HAMMER_VOW_ALIAS = "HammerVowSkips"
+local SELENE_OFFERS_ALIAS = "SeleneToSharedWealth"
+local HEX_VOW_ALIAS = "HexVowSkips"
 local WARNING_TEXT_OPTS = {
     color = { 1.0, 0.18, 0.18, 1.0 },
 }
-local CHALLENGE_WARNING_TEXT = "Challenge run module active: this configuration changes boon rewards."
+local CHALLENGE_WARNING_TEXT = "Challenge run module active: this configuration removes rewards during runs."
+
+local BOON_REWARD_ALIASES = {
+    BOON_OFFERS_ALIAS,
+    BOON_VOW_ALIAS,
+}
+
+local HAMMER_REWARD_ALIASES = {
+    HAMMER_OFFERS_ALIAS,
+    HAMMER_VOW_ALIAS,
+}
+
+local SELENE_REWARD_ALIASES = {
+    SELENE_OFFERS_ALIAS,
+    HEX_VOW_ALIAS,
+}
 
 local OLYMPIAN_GIFT_ALIASES = {
     "ArtemisToSharedWealth",
@@ -25,6 +44,14 @@ local NPC_GIFT_ALIASES = {
     "ChaosToSharedWealth",
 }
 
+local CHECKBOX_GROUPS = {
+    BOON_REWARD_ALIASES,
+    HAMMER_REWARD_ALIASES,
+    SELENE_REWARD_ALIASES,
+    OLYMPIAN_GIFT_ALIASES,
+    NPC_GIFT_ALIASES,
+}
+
 local PRESETS = {
     {
         alias = "clear_all",
@@ -34,22 +61,28 @@ local PRESETS = {
     {
         alias = "no_normal_boons",
         label = "No Normal Boons",
-        enabledAliases = { BOON_OFFERS_ALIAS },
+        enabledAliases = { BOON_REWARD_ALIASES },
     },
     {
         alias = "no_olympian_gifts",
         label = "No Olympian Gifts",
-        enabledAliases = { BOON_OFFERS_ALIAS, OLYMPIAN_GIFT_ALIASES },
+        enabledAliases = { BOON_REWARD_ALIASES, OLYMPIAN_GIFT_ALIASES },
     },
     {
         alias = "no_olympian_and_npc_gifts",
         label = "No Olympian and NPC Gifts",
-        enabledAliases = { BOON_OFFERS_ALIAS, OLYMPIAN_GIFT_ALIASES, NPC_GIFT_ALIASES },
+        enabledAliases = { BOON_REWARD_ALIASES, SELENE_REWARD_ALIASES, OLYMPIAN_GIFT_ALIASES, NPC_GIFT_ALIASES },
     },
     {
         alias = "shared_wealth_only",
         label = "Shared Wealth Only",
-        enableAllSharedWealth = true,
+        enabledAliases = {
+            BOON_REWARD_ALIASES,
+            HAMMER_REWARD_ALIASES,
+            SELENE_REWARD_ALIASES,
+            OLYMPIAN_GIFT_ALIASES,
+            NPC_GIFT_ALIASES,
+        },
     },
 }
 
@@ -99,33 +132,24 @@ local function appendPresetAliases(enabledSet, aliases)
     end
 end
 
-local function preparePreset(preset, allSharedWealthAliases)
+local function preparePreset(preset)
     local enabledSet = {}
-    if preset.enableAllSharedWealth then
-        appendPresetAliases(enabledSet, allSharedWealthAliases)
-    else
-        appendPresetAliases(enabledSet, preset.enabledAliases)
-    end
+    appendPresetAliases(enabledSet, preset.enabledAliases)
     preset.enabledSet = enabledSet
 end
 
 local function buildPresetContext(options)
     local allAliases = {}
     local allAliasSet = {}
-    local allSharedWealthAliases = {}
-    local allSharedWealthAliasSet = {}
 
     for _, option in ipairs(options) do
         if option.type == "checkbox" then
             addAlias(allAliasSet, allAliases, option.alias)
-            if option.alias ~= UNLIMITED_BOON_SKIPS_ALIAS then
-                addAlias(allSharedWealthAliasSet, allSharedWealthAliases, option.alias)
-            end
         end
     end
 
     for _, preset in ipairs(PRESETS) do
-        preparePreset(preset, allSharedWealthAliases)
+        preparePreset(preset)
     end
 
     return {
@@ -206,20 +230,23 @@ local function buildCheckboxOptions(options)
     return optsByAlias
 end
 
-local function drawOptions(draw, state, options, checkboxOptsByAlias)
-    for _, option in ipairs(options) do
-        if option.type == "checkbox" then
-            draw.widgets.checkbox(state.get(option.alias), checkboxOptsByAlias[option.alias])
+local function drawOptions(draw, state, checkboxOptsByAlias)
+    for groupIndex, aliases in ipairs(CHECKBOX_GROUPS) do
+        if groupIndex > 1 then
+            draw.widgets.separator()
+        end
+        for _, alias in ipairs(aliases) do
+            draw.widgets.checkbox(state.get(alias), checkboxOptsByAlias[alias])
         end
     end
 end
 
-function module.drawTab(host, draw, state, options, checkboxOptsByAlias, presetContext)
+function module.drawTab(host, draw, state, checkboxOptsByAlias, presetContext)
     draw.widgets.separator()
     drawPresetDropdown(draw, state, presetContext)
     drawChallengeWarning(draw, host, state, presetContext)
     draw.widgets.separator()
-    drawOptions(draw, state, options, checkboxOptsByAlias)
+    drawOptions(draw, state, checkboxOptsByAlias)
 end
 
 function module.drawQuickContent(host, draw, state, presetContext)
@@ -231,7 +258,7 @@ function module.attach(libModule, options)
     local checkboxOptsByAlias = buildCheckboxOptions(options)
     local presetContext = buildPresetContext(options)
     libModule.ui.tab(function(host, ui)
-        return module.drawTab(host, ui.draw, ui.data, options, checkboxOptsByAlias, presetContext)
+        return module.drawTab(host, ui.draw, ui.data, checkboxOptsByAlias, presetContext)
     end)
     libModule.ui.quickContent(function(host, ui)
         return module.drawQuickContent(host, ui.draw, ui.data, presetContext)

@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added Selene Shared Wealth fallback support and split Vow of Forfeit toggles for boon, hammer, and Selene room rewards.
+
+### Fixed
+
+- Fixed route NPC Shared Wealth toggles for direct choice menus such as Medea, Circe, Icarus, Arachne, Narcissus, and Echo.
+
 ## [1.0.1] - 2026-06-14
 
 ### Fixed

@@ -4,10 +4,13 @@ local assertEqual = support.assertEqual
 local behaviors = support.loadBehaviors()
 local uiModule = assert(loadfile("src/ui.lua"))()
 
+local tabContent
 local quickContent
 uiModule.attach({
     ui = {
-        tab = function() end,
+        tab = function(callback)
+            tabContent = callback
+        end,
         quickContent = function(callback)
             quickContent = callback
         end,
@@ -16,11 +19,7 @@ uiModule.attach({
 
 local values = {}
 for _, option in ipairs(behaviors.options) do
-    if option.alias == "UnlimitedBoonSkips" then
-        values[option.alias] = false
-    else
-        values[option.alias] = true
-    end
+    values[option.alias] = true
 end
 values.Preset = "custom"
 
@@ -71,7 +70,84 @@ quickContent(host, {
 assertEqual(dropdownCurrent, "clear_all")
 for alias, value in pairs(values) do
     if alias ~= "Preset" then
-        assertEqual(value, alias == "BoonOffersToSharedWealth")
+        assertEqual(value, alias == "BoonOffersToSharedWealth" or alias == "BoonVowSkips")
     end
 end
 assertEqual(values.Preset, "no_normal_boons")
+
+local tabValues = {}
+for _, option in ipairs(behaviors.options) do
+    tabValues[option.alias] = false
+end
+tabValues.Preset = "custom"
+
+local drawEvents = {}
+local tabDraw = {
+    widgets = {
+        dropdown = function()
+            return false
+        end,
+        text = function() end,
+        separator = function()
+            drawEvents[#drawEvents + 1] = "separator"
+        end,
+        checkbox = function(field, opts)
+            assertEqual(opts ~= nil, true)
+            drawEvents[#drawEvents + 1] = field.alias
+        end,
+    },
+}
+
+tabContent(host, {
+    draw = tabDraw,
+    data = support.createUiState(tabValues),
+})
+
+local expectedDrawEvents = {
+    "separator",
+    "separator",
+    "BoonOffersToSharedWealth",
+    "BoonVowSkips",
+    "separator",
+    "WeaponUpgradesToSharedWealth",
+    "HammerVowSkips",
+    "separator",
+    "SeleneToSharedWealth",
+    "HexVowSkips",
+    "separator",
+    "ArtemisToSharedWealth",
+    "AthenaToSharedWealth",
+    "DionysusToSharedWealth",
+    "separator",
+    "ArachneToSharedWealth",
+    "NarcissusToSharedWealth",
+    "EchoToSharedWealth",
+    "HadesToSharedWealth",
+    "MedeaToSharedWealth",
+    "CirceToSharedWealth",
+    "IcarusToSharedWealth",
+    "ChaosToSharedWealth",
+}
+
+assertEqual(#drawEvents, #expectedDrawEvents)
+for index, expectedEvent in ipairs(expectedDrawEvents) do
+    assertEqual(drawEvents[index], expectedEvent)
+end
+
+local renderedAliases = {}
+local renderedCount = 0
+for _, event in ipairs(drawEvents) do
+    if event ~= "separator" then
+        renderedAliases[event] = (renderedAliases[event] or 0) + 1
+        renderedCount = renderedCount + 1
+    end
+end
+
+local optionCount = 0
+for _, option in ipairs(behaviors.options) do
+    if option.type == "checkbox" then
+        optionCount = optionCount + 1
+        assertEqual(renderedAliases[option.alias], 1)
+    end
+end
+assertEqual(renderedCount, optionCount)
