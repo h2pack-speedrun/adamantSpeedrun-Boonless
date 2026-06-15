@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-06-15
+
+### Added
+
+- boonless: expand reward fallback controls (5a1b4b0)
+
+### Documentation
+
+- refine package description (
+3685eb)
+
 ### Added
 
 - Added Selene Shared Wealth fallback support and split Vow of Forfeit toggles for boon, hammer, and Selene room rewards.
