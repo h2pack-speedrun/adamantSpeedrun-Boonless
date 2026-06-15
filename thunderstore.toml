@@ -4,7 +4,7 @@ schemaVersion = "0.0.1"
 [package]
 namespace = "adamantSpeedrun"
 name = "Boonless"
-description = "Boonless route options for the Speedrun modpack."
+description = "Boonless module for the Speedrun modpack."
 versionNumber = "1.0.1"
 websiteUrl = "https://github.com/h2pack-speedrun/adamantSpeedrun-Boonless"
 containsNsfwContent = false
